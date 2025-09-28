@@ -82,6 +82,7 @@ class Simulation:
         else:
             z = None
             iFeature = None
+        
         return [z, iFeature]
 
 
@@ -92,7 +93,7 @@ def motion_model(x, u, dt_pred):
     # x: estimated state (x, y, heading)
     # u: control input or odometry measurement in body frame (Vx, Vy, angular rate)
     
-    xPred = # .....................................
+    xPred = tcomp(x, u, dt_pred)
     xPred[2, 0] = angle_wrap(xPred[2, 0])
     
     return xPred
@@ -103,10 +104,18 @@ def observation_model(xVeh, iFeature, Map):
     # xVeh: vecule state
     # iFeature: observed amer index
     # Map: map of all amers
-    
-    z = # ...................
-    z[1, 0] = angle_wrap(z[1, 0])
 
+    Dx = Map[0, iFeature] - xVeh[0, 0]
+    Dy = Map[1, iFeature] - xVeh[1, 0]
+    theta_k = xVeh[2, 0]
+
+    z = np.array([
+        [np.sqrt((Dx)**2 + (Dy)**2)],
+        [np.arctan2(Dy, Dx) - theta_k]
+    ])
+
+    z[1, 0] = angle_wrap(z[1, 0])
+    
     return z
 
 
@@ -118,7 +127,16 @@ def get_obs_jac(xPred, iFeature, Map):
     # iFeature: observed amer index
     # Map: map of all amers
     
-    # ...................
+    Dx = Map[0, iFeature] - xPred[0, 0]
+    Dy = Map[1, iFeature] - xPred[1, 0]
+
+    r2_k = Dx**2 + Dy**2
+    r_k = np.sqrt(r2_k)
+
+    jH = np.array([
+        [-Dx/r_k, -Dy/r_k, 0],
+        [Dy/r2_k, -Dx/r2_k, -1]
+    ])
 
     return jH
 
@@ -150,7 +168,7 @@ def G(x, u, dt_pred):
     # x: estimated state (x, y, heading) in ground frame
     # u: control input (Vx, Vy, angular rate) in robot frame
     # dt_pred: time step for prediction
-    
+
     theta = x[2, 0]
     s = np.sin(theta)
     c = np.cos(theta)
@@ -162,7 +180,6 @@ def G(x, u, dt_pred):
     ])
 
     return df_du
-
 
 # ---- Utils functions ----
 # Display error ellipses
@@ -201,10 +218,10 @@ def plot_covariance_ellipse(xEst, PEst, axes, lineType):
 
 # fit angle between -pi and pi
 def angle_wrap(a):
-    if (a > np.pi):
-        a = a - 2 * pi
-    elif (a < -np.pi):
-        a = a + 2 * pi
+    while a > np.pi:
+        a = a - 2 * np.pi
+    while a < -np.pi:
+        a = a + 2 * np.pi
     return a
 
 
@@ -274,6 +291,9 @@ htime = [0]
 # Simulation environment
 simulation = Simulation(Tf, dt_pred, xTrue, QTrue, xOdom, Map, RTrue, dt_meas)
 
+xPred = xEst
+PPred = PEst
+
 # Temporal loop
 for k in range(1, simulation.nSteps):
 
@@ -284,8 +304,12 @@ for k in range(1, simulation.nSteps):
     xOdom, u_tilde = simulation.get_odometry(k)
 
     # Kalman prediction
-    xPred = #...................  # function f
-    PPred = #...................
+
+    Fk = F(xEst, u_tilde, dt_pred)
+    Gk = G(xEst, u_tilde, dt_pred)
+
+    xPred = motion_model(xEst,u_tilde,dt_pred)
+    PPred = Fk @ PPred @ Fk.T + Gk @ QEst @ Gk.T
 
     # Get random landmark observation
     [z, iFeature] = simulation.get_observation(k)
@@ -298,10 +322,11 @@ for k in range(1, simulation.nSteps):
         H = get_obs_jac(xPred, iFeature, Map)
 
         # compute Kalman gain - with dir and distance
-        Innov = #...................         # observation error (innovation)
+        Innov = z - zPred # observation error (innovation)
         Innov[1, 0] = angle_wrap(Innov[1, 0])
-        S = #...................
-        K = #...................
+        
+        S = H @ PPred @ H.T + REst 
+        K = PPred @ H.T @ np.linalg.inv(S)
 
         # Compute Kalman gain to use only distance
 #        Innov = #...................       # observation error (innovation)
@@ -317,10 +342,10 @@ for k in range(1, simulation.nSteps):
 #        K = #...................
 
         # perform kalman update
-        xEst =  #...................
+        xEst =  xPred + K @ Innov
         xEst[2, 0] = angle_wrap(xEst[2, 0])
 
-        PEst = #...................
+        PEst = (np.eye(3) - K @ H) @PPred
         
         
         PEst = 0.5 * (PEst + PEst.T)  # ensure symetry
