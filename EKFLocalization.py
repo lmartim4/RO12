@@ -291,9 +291,6 @@ htime = [0]
 # Simulation environment
 simulation = Simulation(Tf, dt_pred, xTrue, QTrue, xOdom, Map, RTrue, dt_meas)
 
-xPred = xEst
-PPred = PEst
-
 # Temporal loop
 for k in range(1, simulation.nSteps):
 
@@ -309,7 +306,7 @@ for k in range(1, simulation.nSteps):
     Gk = G(xEst, u_tilde, dt_pred)
 
     xPred = motion_model(xEst,u_tilde,dt_pred)
-    PPred = Fk @ PPred @ Fk.T + Gk @ QEst @ Gk.T
+    PPred = Fk @ PEst @ Fk.T + Gk @ QEst @ Gk.T
 
     # Get random landmark observation
     [z, iFeature] = simulation.get_observation(k)
