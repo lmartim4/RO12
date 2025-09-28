@@ -70,11 +70,15 @@ class Simulation:
         # Model
         if k*self.dt_pred % self.dt_meas == 0:
             notValidCondition = False # False: measurement valid / True: measurement not valid
+            
+            #current_time = k * self.dt_pred
+            #notValidCondition = (current_time >= 2500) and (current_time <= 3500)
+            
             if notValidCondition:
                 z = None
                 iFeature = None
             else:
-                iFeature = np.random.randint(0, self.Map.shape[1] - 1)
+                iFeature = np.random.randint(0, self.Map.shape[1])
                 zNoise = np.sqrt(self.RTrue) @ np.random.randn(2)
                 zNoise = np.array([zNoise]).T
                 z = observation_model(self.xTrue, iFeature, self.Map) + zNoise
