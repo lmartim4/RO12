@@ -129,9 +129,20 @@ def F(x, u, dt_pred):
     # u: control input (Vx, Vy, angular rate)
     # dt_pred: time step
     
-    # ...................
-
-    return Jac
+    vx = u[0, 0]
+    vy = u[1, 0]
+    
+    theta = x[2, 0]
+    s = np.sin(theta)
+    c = np.cos(theta)
+    
+    df_dx = np.array([
+        [1, 0, -(vx * s + vy * c) * dt_pred],
+        [0, 1,  (vx * c - vy * s) * dt_pred],
+        [0, 0,  1]
+    ])
+    
+    return df_dx
 
 
 # f(x,u) Jacobian wrt w (noise on the control input u)
@@ -140,9 +151,17 @@ def G(x, u, dt_pred):
     # u: control input (Vx, Vy, angular rate) in robot frame
     # dt_pred: time step for prediction
     
-    # ...................
+    theta = x[2, 0]
+    s = np.sin(theta)
+    c = np.cos(theta)
+    
+    df_du = np.array([
+        [c*dt_pred, -s*dt_pred,0],
+        [s*dt_pred, c*dt_pred, 0],
+        [0, 0,  dt_pred]
+    ])
 
-    return Jac
+    return df_du
 
 
 # ---- Utils functions ----
