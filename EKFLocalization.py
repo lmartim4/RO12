@@ -16,20 +16,18 @@ try:
 except:
     pass
 
-
-
-# =============================================================================
-# Main Program
-# =============================================================================
+SENSOR_MODE = 'both'  # Options: 'both', 'distance', 'direction'
 
 # Init displays
 show_animation = True
 save = False
 
-f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(14, 7))
-ax3 = plt.subplot(3, 2, 2)
-ax4 = plt.subplot(3, 2, 4)
-ax5 = plt.subplot(3, 2, 6)
+fig = plt.figure(figsize=(14, 10))
+ax1 = plt.subplot(1, 2, 1)  # Left half - large trajectory plot
+ax3 = plt.subplot(4, 2, 2)  # Right side - top
+ax4 = plt.subplot(4, 2, 4)  # Right side - second
+ax5 = plt.subplot(4, 2, 6)  # Right side - third
+ax6 = plt.subplot(4, 2, 8)  # Right side - bottom (trace)
 
 # ---- General variables ----
 
@@ -62,6 +60,7 @@ hxTrue = xTrue
 hxOdom = xOdom
 hxError = np.abs(xEst-xTrue)  # pose error
 hxVar = np.sqrt(np.diag(PEst).reshape(3, 1))  # state std dev
+hPTrace = [np.trace(PEst)]
 htime = [0]
 
 # Simulation environment
@@ -90,37 +89,37 @@ for k in range(1, simulation.nSteps):
     if z is not None:
         # Predict observation
         zPred = observation_model(xPred, iFeature, Map)
-
-        # get observation Jacobian
         H = get_obs_jac(xPred, iFeature, Map)
-
-        # compute Kalman gain - with dir and distance
-        Innov = z - zPred # observation error (innovation)
-        Innov[1, 0] = angle_wrap(Innov[1, 0])
         
-        S = H @ PPred @ H.T + REst 
+        if SENSOR_MODE == 'both':
+            # compute Kalman gain - with dir and distance
+            Innov = z - zPred # observation error (innovation)
+            Innov[1, 0] = angle_wrap(Innov[1, 0])
+            
+            S = H @ PPred @ H.T + REst 
+
+        elif SENSOR_MODE == 'distance':
+            # Compute Kalman gain to use only distance
+            Innov = z[0:1, :] - zPred[0:1, :]
+            H = H[0:1, :]
+            S = H @ PPred @ H.T + REst[0:1, 0:1]
+            
+        elif SENSOR_MODE == 'direction':
+            # Compute Kalman gain to use only direction
+            Innov = z[1:2, :] - zPred[1:2, :]
+            Innov[0, 0] = angle_wrap(Innov[0, 0])
+            H = H[1:2, :]
+            S = H @ PPred @ H.T + REst[1:2, 1:2]
+        else:
+            print("Invalid SENSOR_MODE")
+        
         K = PPred @ H.T @ np.linalg.inv(S)
-
-        # Compute Kalman gain to use only distance
-#        Innov = #...................       # observation error (innovation)
-#        H = #...................
-#        S = #...................
-#        K = #...................
-
-        # Compute Kalman gain to use only direction
-#        Innov = #...................       # observation error (innovation)
-#        Innov[1, 0] = angle_wrap(Innov[1, 0])
-#        H = #...................           # observation error (innovation)
-#        S = #...................
-#        K = #...................
 
         # perform kalman update
         xEst =  xPred + K @ Innov
         xEst[2, 0] = angle_wrap(xEst[2, 0])
 
         PEst = (np.eye(3) - K @ H) @PPred
-        
-        
         PEst = 0.5 * (PEst + PEst.T)  # ensure symetry
 
     else:
@@ -136,6 +135,7 @@ for k in range(1, simulation.nSteps):
     err[2, 0] = angle_wrap(err[2, 0])
     hxError = np.hstack((hxError, err))
     hxVar = np.hstack((hxVar, np.sqrt(np.diag(PEst).reshape(3, 1))))
+    hPTrace.append(np.trace(PEst))
     htime.append(k*simulation.dt_pred)
 
     # plot every 15 updates
@@ -171,7 +171,7 @@ for k in range(1, simulation.nSteps):
         ax3.plot(times, -3.0 * hxVar[0, :], 'r')
         ax3.grid(True)
         ax3.set_ylabel('x (m)')
-        ax3.set_xlabel('time (s)')
+        #ax3.set_xlabel('time (s)')
         ax3.set_title('Real error (blue) and 3 $\sigma$ covariances (red)')
 
         ax4.plot(times, hxError[1, :], 'b')
@@ -179,15 +179,20 @@ for k in range(1, simulation.nSteps):
         ax4.plot(times, -3.0 * hxVar[1, :], 'r')
         ax4.grid(True)
         ax4.set_ylabel('y (m)')
-        ax5.set_xlabel('time (s)')
+        #ax5.set_xlabel('time (s)')
 
         ax5.plot(times, hxError[2, :], 'b')
         ax5.plot(times, 3.0 * hxVar[2, :], 'r')
         ax5.plot(times, -3.0 * hxVar[2, :], 'r')
         ax5.grid(True)
         ax5.set_ylabel(r"$\theta$ (rad)")
-        ax5.set_xlabel('time (s)')
+        #ax5.set_xlabel('time (s)')
         
+        ax6.plot(times, hPTrace, 'g', linewidth=2)
+        ax6.grid(True)
+        ax6.set_ylabel('Trace(P)')
+        ax6.set_xlabel('time (s)')
+
         if save: plt.savefig(r'outputs/EKF_' + str(k) + '.png')
 #        plt.pause(0.001)
 
