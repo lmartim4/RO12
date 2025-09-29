@@ -16,25 +16,25 @@ try:
 except:
     pass
 
-SENSOR_MODE = 'both'  # Options: 'both', 'distance', 'direction'
+SENSOR_MODE = 'both'
 
 # Init displays
 show_animation = True
-save = False
+save = True
 
 fig = plt.figure(figsize=(14, 10))
-ax1 = plt.subplot(1, 2, 1)  # Left half - large trajectory plot
-ax3 = plt.subplot(4, 2, 2)  # Right side - top
-ax4 = plt.subplot(4, 2, 4)  # Right side - second
-ax5 = plt.subplot(4, 2, 6)  # Right side - third
-ax6 = plt.subplot(4, 2, 8)  # Right side - bottom (trace)
+ax1 = plt.subplot(1, 2, 1)
+ax3 = plt.subplot(4, 2, 2)
+ax4 = plt.subplot(4, 2, 4)
+ax5 = plt.subplot(4, 2, 6)
+ax6 = plt.subplot(4, 2, 8)
 
 # ---- General variables ----
 
 # Simulation time
 Tf = 6000       # final time (s)
 dt_pred = 1     # Time between two dynamical predictions (s)
-dt_meas = 1     # Time between two measurement updates (s)
+dt_meas = 100     # Time between two measurement updates (s)
 
 # Location of landmarks
 nLandmarks = 30

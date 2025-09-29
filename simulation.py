@@ -1,5 +1,5 @@
 import numpy as np
-from math import sin, cos, atan2, pi, sqrt
+from math import sin
 from kalman import tcomp, angle_wrap, observation_model
 from seed import *
 
