@@ -16,7 +16,7 @@ try:
 except:
     pass
 
-SENSOR_MODE = 'both'
+SENSOR_MODE = 'distance+direction'
 
 # Init displays
 show_animation = True
@@ -47,6 +47,10 @@ RTrue = np.diag([3.0, 3*pi/180]) ** 2
 # Modeled errors used in the Kalman filter process
 QEst = 1*np.eye(3, 3) @ QTrue
 REst = 1*np.eye(2, 2) @ RTrue
+
+# Calculate sigma values for display
+QEst_sigmas = np.sqrt(np.diag(QEst))
+REst_sigmas = np.sqrt(np.diag(REst))
 
 # initial conditions
 xTrue = np.array([[1, -40, -pi/2]]).T
@@ -91,7 +95,7 @@ for k in range(1, simulation.nSteps):
         zPred = observation_model(xPred, iFeature, Map)
         H = get_obs_jac(xPred, iFeature, Map)
         
-        if SENSOR_MODE == 'both':
+        if SENSOR_MODE == 'distance+direction':
             # compute Kalman gain - with dir and distance
             Innov = z - zPred # observation error (innovation)
             Innov[1, 0] = angle_wrap(Innov[1, 0])
@@ -164,14 +168,23 @@ for k in range(1, simulation.nSteps):
         ax1.axis([-70, 70, -70, 70])
         ax1.grid(True)
         ax1.legend()
+        
+        param_text = f'Simulation Parameters:\n'
+        param_text += f'Landmarks: {nLandmarks}\n'
+        param_text += f'dt_meas: {dt_meas} s\n'
+        param_text += f'Sensor: {SENSOR_MODE}\n'
+        param_text += f'QEst $\sigma$: [{QEst_sigmas[0]:.4f}, {QEst_sigmas[1]:.4f}, {QEst_sigmas[2]:.4f}]\n'
+        param_text += f'REst $\sigma$: [{REst_sigmas[0]:.2f}, {REst_sigmas[1]:.4f}]'
+        
+        ax1.text(0.22, 1.13, param_text, transform=ax1.transAxes,
+                fontsize=9, verticalalignment='top', horizontalalignment='center',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
-        # plot errors curves
         ax3.plot(times, hxError[0, :], 'b')
         ax3.plot(times, 3.0 * hxVar[0, :], 'r')
         ax3.plot(times, -3.0 * hxVar[0, :], 'r')
         ax3.grid(True)
         ax3.set_ylabel('x (m)')
-        #ax3.set_xlabel('time (s)')
         ax3.set_title('Real error (blue) and 3 $\sigma$ covariances (red)')
 
         ax4.plot(times, hxError[1, :], 'b')
@@ -179,14 +192,12 @@ for k in range(1, simulation.nSteps):
         ax4.plot(times, -3.0 * hxVar[1, :], 'r')
         ax4.grid(True)
         ax4.set_ylabel('y (m)')
-        #ax5.set_xlabel('time (s)')
 
         ax5.plot(times, hxError[2, :], 'b')
         ax5.plot(times, 3.0 * hxVar[2, :], 'r')
         ax5.plot(times, -3.0 * hxVar[2, :], 'r')
         ax5.grid(True)
         ax5.set_ylabel(r"$\theta$ (rad)")
-        #ax5.set_xlabel('time (s)')
         
         ax6.plot(times, hPTrace, 'g', linewidth=2)
         ax6.grid(True)
