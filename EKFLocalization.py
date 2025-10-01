@@ -5,7 +5,7 @@ authors: Goran Frehse, David Filliat, Nicolas Merlinge
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
+from seed import *
 
 import simulation as sim
 from kalman import F, G, get_obs_jac, motion_model, plot_covariance_ellipse, observation_model, angle_wrap, pi
