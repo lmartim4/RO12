@@ -87,7 +87,7 @@ class Simulation:
         # the robot sometimes gets a measurement of a random landmark. That measurement is noisy, and sometimes it may not exist at all (depending on timing and validity conditions).
 ```
 
-### EKFLocalization
+### EKFLocalization.py
 
 This is the main program. It is responsible for using the other files to implement the Extended Kalman Filter algorithm for mobile robot localization, simulating robot motion with odometry and landmark observations. This program is also responsible for configurating all simulation parameters and ploting the simulation into a nice screen. It tracks errors and covariance, and visualizes trajectories, 3σ bounds, and covariance evolution in real time, supporting distance, direction, or combined sensor modes.
 
@@ -204,7 +204,7 @@ It is then the error associated with the x-axis, y-axis and direction.
 
 Some experiments were conducted in order to visualize how important those parameters are for the EFK performance. Worse odometries forces the filter to relie on the landmark sensoring and vice-versa. 
 
-The figures on the left has a worse odometry than the baseline and better on the right. We start by checking the X-axis and Y-axis precision, then we move to direction.
+The figures on the left has a worse odometry than the baseline and better on the right. We start by checking the X-axis and Y-axis precision, then we'll move to direction analysis.
 
 | $\sigma_x$ and $\sigma_y$ $\times 10$ | $\sigma_x$ and $\sigma_y$ $/ 10$ |
 | --- | --- |
@@ -214,19 +214,19 @@ The figures on the left has a worse odometry than the baseline and better on the
 | --- | --- |
 | ![](/gifs/QEst/theta_10.gif) | ![](/gifs/QEst/theta_div_ten.gif) |
 
-By analysing the figures above we can that the performace gain atributed to the direction odometry is brutal. Both x and y odomtries seems to play a imporant role in local prediction, we can see the trajectorie becomes much smoother. However to final position estimation a better direction estimation is crucial. As the original odometry already has a smooth movement it seems that Kalman is already trusting the local prediction to the robots odometry which seems to make sense once that our X and Y precision has and ordem of $10^{-2}$ m (centimeters). We'll better explore this on the next experiments.
+By analysing the figures above we can that the performace gain atributed to the direction odometry is brutal. Both x and y odomtries seems to play a imporant role in local prediction, we can see the trajectorie becomes much smoother. However, for a better final position estimation the direction estimation is crucial. As the original odometry already has a smooth movement it seems that Kalman is already trusting the local prediction to the robots local odometry which seems to make sense once that our X and Y precision has and ordem of $10^{-2}$ m (centimeters). We'll better explore this on the next experiments, we'll make the distance sensor worse and it won't affect to much ni the smoothness ni the overall EKF estimation.
 
 ### REst Noise
 
-This section we'll be analysing what happens when we increase and decrease the sensors precision.
+This section we'll be analysing what happens when we increase and decrease each sensor's precision.
 
-The following figures will compare our baseline to improved sensors. As mentioned earlier we suspected that our local odometry was already "good enough" leaving us with a smooth trajectory. Improving our sensor distance precision by a factor of ten we can see that the X and Y estimation has a smaller uncertainty but having such a better distance sensoring does not really improve direction estimation, which was already low anyway. Later on this document we'll investigate the behaviour of each sensor isolated, so that we can dig down on this hypotesis.
+The following figures compare our baseline with the improved sensor configurations. As mentioned earlier, we suspect that the local odometry was already “good enough,” providing a smooth trajectory. When we improved the distance sensor precision by a factor of ten, the X and Y position estimates showed reduced uncertainty. However, this higher precision did not significantly improve direction estimation, which was already relatively low in error. Later in this document, we will analyze the behavior of each sensor in isolation to further investigate this hypothesis.
 
 | Baseline | $\sigma_{distance}/10$ |
 | --- | --- |
 | ![](/gifs/baseline.gif) | ![](/gifs/REst/dist_sur_10.gif) |
 
-In the following figures we can see that improving our direction sensor really clamps our already high precision direction estimation. It also improoved the X and Y precisions as we can see on the plot by having a thinner gap of the red lines on X and Y plots 
+In the following figures we can see that improving our direction sensor really clamps our already high precision direction estimation. It also improoved the X and Y precisions as we can see on the plot by having a thinner gap of the red lines on X and Y plots, demonstrating its essential role.
 
 | Baseline | $\sigma_{direction}/10$ |
 | --- | --- |
@@ -252,11 +252,6 @@ Overall comparison for both precisions compared to the baseline
 ### Sensor Isolation Investigation
 
 For this part of the study we'll be investigating how each sensor alone performs on the absence of the other. We'll also search how important QEst and REst becomes in each scenario.  
-
-|          |  Range-Only  | Direction-Only  |
-|-------   |-----|-----|
-| **QEst** |     |     |
-| **REst** |     |     |
 
 ### Range Only
 
