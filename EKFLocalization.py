@@ -16,7 +16,7 @@ try:
 except:
     pass
 
-SENSOR_MODE = 'distance+direction'
+SENSOR_MODE = 'distance+direction' # distance+direction
 
 # Init displays
 show_animation = True
@@ -34,7 +34,7 @@ ax6 = plt.subplot(4, 2, 8)
 # Simulation time
 Tf = 6000       # final time (s)
 dt_pred = 1     # Time between two dynamical predictions (s)
-dt_meas = 100     # Time between two measurement updates (s)
+dt_meas = 1     # Time between two measurement updates (s)
 
 # Location of landmarks
 nLandmarks = 30
@@ -42,7 +42,7 @@ Map = 140*(np.random.rand(2, nLandmarks) - 1/2)
 
 # True covariance of errors used for simulating robot movements
 QTrue = np.diag([0.01, 0.01, 1*pi/180]) ** 2
-RTrue = np.diag([3.0, 3*pi/180]) ** 2
+RTrue = np.diag([0.3, 0.3*pi/180]) ** 2
 
 # Modeled errors used in the Kalman filter process
 QEst = 1*np.eye(3, 3) @ QTrue
