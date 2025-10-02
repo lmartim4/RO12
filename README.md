@@ -195,7 +195,21 @@ We can see a similar behaviour to the last experiment where when there is no lan
 
 Is is also possible to see that the $3\sigma$ confiance interval grows. It is clearer to confirm it by checking the trace(P) plot. The 5s interval "converges" much quicker than the "50s"
 
+### Landmarks
 
+In this section we are going to use our baseline experiment to verify if there is a minimum amount of landmarks where beyond this limit adding more landmarks doesn't apport big bennefits.
+
+| $N = 1$ | $N = 2$ |
+| --- | --- |
+| ![](/gifs/landmarks/one.gif) | ![](/gifs/landmarks/two.gif) |
+
+| $N = 3$ | $N = 300$ |
+| --- | --- |
+| ![](/gifs/landmarks/three.gif) | ![](/gifs/landmarks/300.gif) |
+
+From these four plots, we can see that there is a huge impact when going from N=1 to N=2. Adding a third doesn't seem to have much effect anymore, and by N=300 it's clear that increasing the number of landmarks makes almost no difference.
+
+We are noting this result and later on this document we'll verify if N=2 is still this "limit" where the performance impacts stops.
 
 ### QEst Noise
 
@@ -253,41 +267,39 @@ Overall comparison for both precisions compared to the baseline
 
 For this part of the study we'll be investigating how each sensor alone performs on the absence of the other. We'll also search how important QEst and REst becomes in each scenario.  
 
+The following figures compares the performance of only having one of the sensors at a time. It clearly shows that the direction sensoring play a mojor role to the kalman filter overall performance. Having the direction estimation not only drastically reduces the angular pose uncertanty but also ameliorates the X and Y positions, making the estimated trajectory much smoother and precise. 
+
+| No Direction *(range-only)* | No Distance *(direction-only)*|
+| --- | --- |
+| ![](/gifs/dist_only/baseline_dist_only.gif) | ![](/gifs/direc_only/direction_only_baseline.gif) |
+
 ### Range Only
 
-As shown previously in this document having the x-axis and y-axis odometry more accurate doesn't make a noticiable difference. In this range-only section we'll be able to testify the downsides of not having a direction sensoring. We'll start by changing the odometry precision it self and then change the precision of the distance sensor to see how well it performs. On the end we'll be checking how important the landmarks are and search a landmark amount threshold that won't make any great difference by adding more. 
+In this section we are analysing how EKF performs based only in odometry and landmarks' **distances**.
 
 #### QEst tunning
 
-The figure on the right shows the previously conducted experiment on improiving QEst for x and y. The figure on the left shows the same exact experiemnt but without the direction sensor (range-only).
+In order to the EFK to have more or less the same performance as the original baseline it is clear that we should improve the direction estimation or odometry.
+Our baseline had a $3\sigma = 0.1$, to achieve this again it was clear that we needed to drastically reduce the odometry direction uncertainty.
 
-We can attest the direction sensor benefits for both direction and position estimations. If you take a look on he X,Y axis it is clear that the gap between the red lines are considerably smaller, so is the case for the direction plot.
+Setting $\sigma_\theta$ to $0.08\times\pi/180$ = $0.08\degree$ got us to the following overall results.
 
-The behaviour is analogous to higher $\sigma_x$ and $\sigma_y$.
 
-| RANGE ONLY ($\sigma_x , \sigma_y$ / 10) | BOTH ($\sigma_x , \sigma_y$ / 10) |
+| Baseline | $\sigma_\theta = 0.08\degree$  |
 | --- | --- |
-| ![](/gifs/dist_only/QEst/x_y_div_ten.gif) | ![](/gifs/QEst/x_y_div_ten.gif) |
-
-
-The brutal deviation from odometry due to poor direction estimation seems to be confirmed. In the following gif we can verify that by making the direction odometry 10x smaller made the odometry estimation much better. Even tough the general performance of the EKF does not seem to be that better. It is indeed much smoother and is explained by the new direction odomertry precision.
-
-In the following figures we'll see what happens if the QEst had a much smaller $\sigma_\theta$.
-We'll see that is the odometry alone is still not enough. Having both sensor is still better and improves overall estimation quality. It is clearly visible on the direction error estimation. Having both sensor provides a much better estimation.
-
-| RANGE ONLY ($\sigma_\theta$ / 10) | BOTH ($\sigma_\theta$ / 10) |
-| --- | --- |
-| ![](/gifs/dist_only/QEst/theta_div_ten.gif) | ![](/gifs/QEst/theta_div_ten.gif) |
-
+| ![](/gifs/baseline.gif) | ![](/gifs/direc_only/tunned_odometrie.gif) |
 
 #### REst tunning
 
+The direction odometrie had to improved by a factor of 12.5 and still wasn't able to make the x and y metrics to come down. The uncertainty of the distance sensor also had to go down, reinforcing the importance of that sensor.
 
-
+| Baseline | $\sigma_\theta = 0.08\degree$ and $\sigma_{distance} = 2$  |
+| --- | --- |
+| ![](/gifs/baseline.gif) | ![](/gifs/direc_only/tunned_sensor.gif) |
 
 #### Landmarks 
 
-The following test will vary the landmarks count. Our objective is to verify if only 3 landmarks are still enough for a good EKF performance as it was verified on the dual sensor setup.
+The following test will vary the landmarks count. Our objective is to verify if only 2 landmarks are still enough for a good EKF performance as it was verified above on the dual sensor setup.
 
 | Landmarks = 1 | Landmarks = 2 |
 | --- | --- |
@@ -297,17 +309,46 @@ The following test will vary the landmarks count. Our objective is to verify if 
 | --- | --- |
 | ![](/gifs/dist_only/landmarks/3.gif) | ![](/gifs/dist_only/landmarks/30.gif) |
 
-#### Results
+Now it is a bit clearer that N=2 might be unstable in some cases for the range-only sensoring. Now N=3 seems to be the "limit", which is still no much and makes sense accordingly to the triangularization problem, where to accurately estimate a position you must have at least 3 points of reference.
 
-When only the distance sensor was used for measurements, no configuration led to improved direction estimation. All experiments showed similar performance, with errors around [-0.5, 0.5] rad. Varying the number of landmarks revealed that performance did not improve beyond three landmarks. With two landmarks, the performance was quite similar overall, although in some regions the Kalman filter lost track slightly, which is expected due to the triangulation problem.
-
-To improve estimation, we varied QEst and REst. Adjusting the QEst parameters directly influenced the odometry estimation quality, leading to some improvement. However, even after reducing it by a factor of 10, the overall performance remained similar to before, suggesting that enhancing odometry precision is not an effective strategy.
-
-On the other hand, improving the quality of the range sensor produced significant improvements. It allowed the Kalman filter to drastically reduce the estimation error.
+|  |
+| --- |
+| ![](/Triangulation-based-Localization.png) |
 
 ### Direction Only
 
+In this section we are analysing how EKF performs based only in odometry and landmarks' **directions**.
+
+| Baseline | Direction-Only Baseline |
+| --- | --- |
+| ![](/gifs/baseline.gif) | ![](/gifs/direc_only/direction_only_baseline.gif) |
+
+By observing the figures above we can see that by removing distance to the landmarks sensors our trajectory has almost the same performance.
+
 #### QEst tunning
+
+For this section lets test how much we can worse our odometrie and still obtain similar results to the baseline. As we are not calculating distances and we already had the insight that X and Y were beeing more estimated by our odometrie lets try to mess the direction odometrie and see up to which point only the sensoring can mitigate the problems.
+
+I tried multiple values for $\sigma_\theta$ and made it five times more uncertain and I was still able to achive satifastory results.
+
+| $\sigma_{\theta} = 5\degree$ |
+|  --- |
+| ![](/gifs/direc_only/QEst/sigma_times_5.gif) |
+
+| $\sigma_{\theta} = 10\degree$ | $\sigma_{\theta} = 22.5\degree$ |
+| --- | --- |
+| ![](/gifs/direc_only/QEst/sigma_times_10.gif) | ![](/gifs/direc_only/QEst/sigma_times_225.gif) |
+
+Even after drastically increasing the $\sigma_{\theta}$ the overall performance remained stable and close to baseline performance. This should not happen if we increase $\sigma_{x}$ and $\sigma_{y}$, that because we already noticed that the precision on x and y axis are atributed to the nice position odometry the robot already had.
+
+The following image shows two scenarios the odometry noise 10x higher than original baseline.
+The left one has both sensors and the right has only direction sensor.
+
+It is clear that both have equivalent performance showing once again that the distance sensor is not really doing much in improving our EKF pose estimation. The Kalman gain is and was certainly relling bascially only in x, y odometry.
+
+| (Both sensors) $\sigma_x$ and $\sigma_y$ $\times 10$  | (Direction Only) $\sigma_{x}$ , $\sigma_{y}$ $\times10$ |
+|  --- | --- |
+| ![](/gifs/QEst/xy_10.gif) | ![](/gifs/direc_only/QEst/xy_times_10.gif) |
 
 #### REst tunning
 
@@ -315,10 +356,8 @@ On the other hand, improving the quality of the range sensor produced significan
 
 | Landmarks = 1 | Landmarks = 2 |
 | --- | --- |
-| ![](/gifs/direc_only/1.gif) | ![](/gifs/direc_only/2.gif) |
+| ![](/gifs/direc_only/landmarks/1.gif) | ![](/gifs/direc_only/landmarks/2.gif) |
 
 | Landmarks = 3 | Landmarks = 30 |
 | --- | --- |
-| ![](/gifs/direc_only/3.gif) | ![](/gifs/direc_only/30.gif) |
-
-#### Results
+| ![](/gifs/direc_only/landmarks/3.gif) | ![](/gifs/direc_only/landmarks/30.gif) |
