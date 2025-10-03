@@ -175,13 +175,13 @@ I used the *save* parameter to generate the intermediare figures and then made a
 
 This first experiment shows that the filter is actually working. In green we can see what the odometry alone would estimate, beeing completelly blinded from the landmarks measurements. There we can see that from the first seconds it has already a poor estimation, completelly diverging from the actual positioning.
 
-![](/gifs/baseline.gif)
+![](gifs/baseline.gif)
 
 ### Trou de measures
 
 In this experiment we are simulating what happens if the landmarking sensoring stop suddenly [from time 2500s up to 3500s]. It is impressive how fast the algorithm fixes the new odometry error, showing that it in fact a roboust method.
 
-![](/gifs/trou_sim/sensor_problems.gif)
+![](gifs/trou_sim/sensor_problems.gif)
 
 ### Sensor measurment interval
 
@@ -189,7 +189,7 @@ In a similar way of the experiment above, we can investigate how the algorithm p
 
 | 5s | 50s |
 | --- | --- |
-| ![](/gifs/dt_meas/dt_meas_5.gif) | ![](/gifs/dt_meas/dt_meas_50.gif) |
+| ![](gifs/dt_meas/dt_meas_5.gif) | ![](gifs/dt_meas/dt_meas_50.gif) |
 
 We can see a similar behaviour to the last experiment where when there is no landmark we end up having to trust the odometry blindly. However, as it is for a small amount of time the filter is indeed able to quickly "reset" the error. 
 
@@ -201,11 +201,11 @@ In this section we are going to use our baseline experiment to verify if there i
 
 | $N = 1$ | $N = 2$ |
 | --- | --- |
-| ![](/gifs/landmarks/one.gif) | ![](/gifs/landmarks/two.gif) |
+| ![](gifs/landmarks/one.gif) | ![](gifs/landmarks/two.gif) |
 
 | $N = 3$ | $N = 300$ |
 | --- | --- |
-| ![](/gifs/landmarks/three.gif) | ![](/gifs/landmarks/300.gif) |
+| ![](gifs/landmarks/three.gif) | ![](gifs/landmarks/300.gif) |
 
 From these four plots, we can see that there is a huge impact when going from N=1 to N=2. Adding a third doesn't seem to have much effect anymore, and by N=300 it's clear that increasing the number of landmarks makes almost no difference.
 
@@ -222,11 +222,11 @@ The figures on the left has a worse odometry than the baseline and better on the
 
 | $\sigma_x$ and $\sigma_y$ $\times 10$ | $\sigma_x$ and $\sigma_y$ $/ 10$ |
 | --- | --- |
-| ![](/gifs/QEst/xy_10.gif) | ![](/gifs/QEst/x_y_div_ten.gif)|
+| ![](gifs/QEst/xy_10.gif) | ![](gifs/QEst/x_y_div_ten.gif)|
 
 | $\sigma_\theta\times 10$ | $\sigma_\theta/10$ |
 | --- | --- |
-| ![](/gifs/QEst/theta_10.gif) | ![](/gifs/QEst/theta_div_ten.gif) |
+| ![](gifs/QEst/theta_10.gif) | ![](gifs/QEst/theta_div_ten.gif) |
 
 By analysing the figures above we can that the performace gain atributed to the direction odometry is brutal. Both x and y odomtries seems to play a imporant role in local prediction, we can see the trajectorie becomes much smoother. However, for a better final position estimation the direction estimation is crucial. As the original odometry already has a smooth movement it seems that Kalman is already trusting the local prediction to the robots local odometry which seems to make sense once that our X and Y precision has and ordem of $10^{-2}$ m (centimeters). We'll better explore this on the next experiments, we'll make the distance sensor worse and it won't affect to much ni the smoothness ni the overall EKF estimation.
 
@@ -238,30 +238,30 @@ The following figures compare our baseline with the improved sensor configuratio
 
 | Baseline | $\sigma_{distance}/10$ |
 | --- | --- |
-| ![](/gifs/baseline.gif) | ![](/gifs/REst/dist_sur_10.gif) |
+| ![](gifs/baseline.gif) | ![](gifs/REst/dist_sur_10.gif) |
 
 In the following figures we can see that improving our direction sensor really clamps our already high precision direction estimation. It also improoved the X and Y precisions as we can see on the plot by having a thinner gap of the red lines on X and Y plots, demonstrating its essential role.
 
 | Baseline | $\sigma_{direction}/10$ |
 | --- | --- |
-| ![](/gifs/baseline.gif) | ![](/gifs/REst/direction_sur_10.gif) |
+| ![](gifs/baseline.gif) | ![](gifs/REst/direction_sur_10.gif) |
 
 
 In the following figures we are comparing worse sensors to better sensors relative to our baseline by a factor of ten. Once again the direction sensoring seems to be the one promoting the greatest benefits.
 
 | $\sigma_{distance}\times10$ | $\sigma_{distance}/10$ | 
 | --- | --- |
-| ![](/gifs/REst/distance_times_10.gif) | ![](/gifs/REst/dist_sur_10.gif) |
+| ![](gifs/REst/distance_times_10.gif) | ![](gifs/REst/dist_sur_10.gif) |
 
 | $\sigma_{direction}\times10$ | $\sigma_{direction}/10$ | 
 | --- | --- |
-| ![](/gifs/REst/direction_times_10.gif) | ![](/gifs/REst/direction_sur_10.gif) |
+| ![](gifs/REst/direction_times_10.gif) | ![](gifs/REst/direction_sur_10.gif) |
 
 Overall comparison for both precisions compared to the baseline
 
 | $\sigma_{distance}$ and $\sigma_{direction}\times10$ | Baseline | $\sigma_{distance}$ and $\sigma_{direction}/10$ | 
 | --- | --- | --- |
-| ![](/gifs/REst/angle_distance_times10.gif) | ![](/gifs/baseline.gif) | ![](/gifs/REst/dist_direct_sur_10.gif) |
+| ![](gifs/REst/angle_distance_times10.gif) | ![](gifs/baseline.gif) | ![](gifs/REst/dist_direct_sur_10.gif) |
 
 ### Sensor Isolation Investigation
 
@@ -271,7 +271,7 @@ The following figures compares the performance of only having one of the sensors
 
 | No Direction *(range-only)* | No Distance *(direction-only)*|
 | --- | --- |
-| ![](/gifs/dist_only/baseline_dist_only.gif) | ![](/gifs/direc_only/direction_only_baseline.gif) |
+| ![](gifs/dist_only/baseline_dist_only.gif) | ![](gifs/direc_only/direction_only_baseline.gif) |
 
 ### Range Only
 
@@ -287,7 +287,7 @@ Setting $\sigma_\theta$ to $0.08\times\pi/180$ = $0.08\degree$ got us to the fol
 
 | Baseline | $\sigma_\theta = 0.08\degree$  |
 | --- | --- |
-| ![](/gifs/baseline.gif) | ![](/gifs/direc_only/tunned_odometrie.gif) |
+| ![](gifs/baseline.gif) | ![](gifs/direc_only/tunned_odometrie.gif) |
 
 #### REst tunning
 
@@ -295,7 +295,7 @@ The direction odometrie had to improved by a factor of 12.5 and still wasn't abl
 
 | Baseline | $\sigma_\theta = 0.08\degree$ and $\sigma_{distance} = 2$  |
 | --- | --- |
-| ![](/gifs/baseline.gif) | ![](/gifs/direc_only/tunned_sensor.gif) |
+| ![](gifs/baseline.gif) | ![](gifs/direc_only/tunned_sensor.gif) |
 
 #### Landmarks 
 
@@ -303,11 +303,11 @@ The following test will vary the landmarks count. Our objective is to verify if 
 
 | Landmarks = 1 | Landmarks = 2 |
 | --- | --- |
-| ![](/gifs/dist_only/landmarks/1.gif) | ![](/gifs/dist_only/landmarks/2.gif) |
+| ![](gifs/dist_only/landmarks/1.gif) | ![](gifs/dist_only/landmarks/2.gif) |
 
 | Landmarks = 3 | Landmarks = 30 |
 | --- | --- |
-| ![](/gifs/dist_only/landmarks/3.gif) | ![](/gifs/dist_only/landmarks/30.gif) |
+| ![](gifs/dist_only/landmarks/3.gif) | ![](gifs/dist_only/landmarks/30.gif) |
 
 Now it is a bit clearer that N=2 might be unstable in some cases for the range-only sensoring. Now N=3 seems to be the "limit", which is still no much and makes sense accordingly to the triangularization problem, where to accurately estimate a position you must have at least 3 points of reference.
 
@@ -321,7 +321,7 @@ In this section we are analysing how EKF performs based only in odometry and lan
 
 | Baseline | Direction-Only Baseline |
 | --- | --- |
-| ![](/gifs/baseline.gif) | ![](/gifs/direc_only/direction_only_baseline.gif) |
+| ![](gifs/baseline.gif) | ![](gifs/direc_only/direction_only_baseline.gif) |
 
 By observing the figures above we can see that by removing distance to the landmarks sensors our trajectory has almost the same performance.
 
@@ -333,11 +333,11 @@ I tried multiple values for $\sigma_\theta$ and made it five times more uncertai
 
 | $\sigma_{\theta} = 5\degree$ |
 |  --- |
-| ![](/gifs/direc_only/QEst/sigma_times_5.gif) |
+| ![](gifs/direc_only/QEst/sigma_times_5.gif) |
 
 | $\sigma_{\theta} = 10\degree$ | $\sigma_{\theta} = 22.5\degree$ |
 | --- | --- |
-| ![](/gifs/direc_only/QEst/sigma_times_10.gif) | ![](/gifs/direc_only/QEst/sigma_times_225.gif) |
+| ![](gifs/direc_only/QEst/sigma_times_10.gif) | ![](gifs/direc_only/QEst/sigma_times_225.gif) |
 
 Even after drastically increasing the $\sigma_{\theta}$ the overall performance remained stable and close to baseline performance. This should not happen if we increase $\sigma_{x}$ and $\sigma_{y}$, that because we already noticed that the precision on x and y axis are atributed to the nice position odometry the robot already had.
 
@@ -348,7 +348,7 @@ It is clear that both have equivalent performance showing once again that the di
 
 | (Both sensors) $\sigma_x$ and $\sigma_y$ $\times 10$  | (Direction Only) $\sigma_{x}$ , $\sigma_{y}$ $\times10$ |
 |  --- | --- |
-| ![](/gifs/QEst/xy_10.gif) | ![](/gifs/direc_only/QEst/xy_times_10.gif) |
+| ![](gifs/QEst/xy_10.gif) | ![](gifs/direc_only/QEst/xy_times_10.gif) |
 
 #### REst tunning
 
@@ -356,8 +356,8 @@ It is clear that both have equivalent performance showing once again that the di
 
 | Landmarks = 1 | Landmarks = 2 |
 | --- | --- |
-| ![](/gifs/direc_only/landmarks/1.gif) | ![](/gifs/direc_only/landmarks/2.gif) |
+| ![](gifs/direc_only/landmarks/1.gif) | ![](gifs/direc_only/landmarks/2.gif) |
 
 | Landmarks = 3 | Landmarks = 30 |
 | --- | --- |
-| ![](/gifs/direc_only/landmarks/3.gif) | ![](/gifs/direc_only/landmarks/30.gif) |
+| ![](gifs/direc_only/landmarks/3.gif) | ![](gifs/direc_only/landmarks/30.gif) |
