@@ -163,7 +163,7 @@ The code provided was a bit modified so that the plots will also inform the stat
 
 - Landmark count
 - Delta time between measurements
-- Available sensors (distance/direction/both]
+- Available sensors (distance/direction/both)
 - Odometry noise/precision
 - Sensor noise/precision
 
@@ -311,9 +311,7 @@ The following test will vary the landmarks count. Our objective is to verify if 
 
 Now it is a bit clearer that N=2 might be unstable in some cases for the range-only sensoring. Now N=3 seems to be the "limit", which is still no much and makes sense accordingly to the triangularization problem, where to accurately estimate a position you must have at least 3 points of reference.
 
-|  |
-| --- |
-| ![](/Triangulation-based-Localization.png) |
+![](/Triangulation-based-Localization.png)
 
 ### Direction Only
 
